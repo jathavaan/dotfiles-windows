@@ -1,0 +1,56 @@
+[general]
+working_directory = "C:/Users/jathavaan.shankarr/"
+import = ["C:/Users/jathavaan.shankarr/AppData/Roaming/alacritty/theme.toml"]
+live_config_reload = true
+
+
+[env]
+TERM = "xterm-256color"
+PSMUX_AUTOSTART = "1"
+
+[terminal.shell]
+program = "pwsh"
+args = ["-NoLogo"]
+
+[window]
+opacity = 1
+decorations = "Full"
+decorations_theme_variant = "Dark"
+blur = true
+
+padding.x = 0
+padding.y = 0 
+
+startup_mode = "Maximized"
+title = "Alacritty"
+dynamic_title = false
+
+[font]
+size = 12.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+
+[font.italic]
+family = "JetBrainsMono Nerd Font"
+
+[font.bold_italic]
+family = "JetBrainsMono Nerd Font"
+
+
+[scrolling]
+history = 10000
+multiplier = 3
+
+[keyboard]
+bindings = [
+  # { key = "Space", mods = "Control", action = "ToggleViMode" },
+  { key = "V", mods = "Control|Shift", action = "Paste" },
+  { key = "C", mods = "Control|Shift", action = "Copy" },
+  { key = "N", mods = "Control|Shift", action = "CreateNewWindow" },
+  { key = "T", mods = "Control|Shift", command = { program = "powershell", args = ["-NoProfile", "-WindowStyle", "Hidden", "-File", "C:\\Users\\jathavaan.shankarr\\AppData\\Roaming\\alacritty\\toggle-theme.ps1"] } },
+  { key = "Return", mods = "Shift", chars = "\u001B\r" },
+]
