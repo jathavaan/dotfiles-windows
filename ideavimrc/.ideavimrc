@@ -1,0 +1,417 @@
+" =============================================================================
+"  ~/.ideavimrc  —  IdeaVim config (Windows 11, JetBrains Windows keymap)
+"
+"  Marketplace plugins required:
+"    - IdeaVim
+"    - AceJump      (s / S / gs jump labels)
+"    - Which-Key    (<leader> popup)
+"
+"  IDE setup required:
+"    Settings > Tools > Actions on Save
+"      [x] Reformat code
+"      [x] Optimize imports
+"
+"  Native shortcuts kept as-is (deliberately NOT remapped):
+"    Alt+1        Project tool window
+"    Alt+F12      Terminal
+"    Shift+F10    Run
+"    Shift+F9     Debug
+"    Ctrl+Alt+S   Settings
+"
+"  Reload after editing:  <leader>vr
+" =============================================================================
+
+let mapleader = " "
+
+" =============================================================================
+"  OPTIONS
+" =============================================================================
+set number
+set relativenumber
+set showcmd
+set showmode
+set visualbell
+set scrolloff=8
+set sidescrolloff=8
+
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+
+set clipboard=unnamedplus
+set clipboard+=ideaput          " IDE reformats / adds imports on paste
+
+set ideajoin                    " J uses IntelliJ smart join
+set idearefactormode=keep       " stay in normal mode during refactorings
+set ideamarks
+
+" Which-Key needs no timeout so the popup stays until you choose
+set notimeout
+
+" =============================================================================
+"  EMULATED PLUGINS
+" =============================================================================
+set surround                    " ys / cs / ds
+set commentary                  " gcc, gc{motion}, gcap
+set highlightedyank
+set argtextobj                  " cia / daa / via
+let g:argtextobj_pairs = "(:),{:},<:>,[:]"
+set textobj-entire              " dae / yae / vae
+set multiple-cursors
+set NERDTree
+set which-key
+
+" quickscope — highlights the best f/F/t/T target per word.
+" Closest thing to flash.nvim's jump_labels on f/F/t/T. Delete if unwanted.
+set quickscope
+let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
+let g:qs_primary_color = '#e64553'
+let g:qs_secondary_color = '#fe640b'
+
+let g:highlightedyank_highlight_duration = "300"
+let g:highlightedyank_highlight_color = "rgba(69, 71, 90, 200)"
+
+" =============================================================================
+"  SETHANDLER — who gets the keypress, vim or the IDE
+" =============================================================================
+" vim wins
+sethandler <C-D> a:vim          " half page down
+sethandler <C-U> a:vim          " half page up
+sethandler <C-O> a:vim          " jumplist back
+sethandler <C-R> a:vim          " redo
+sethandler <C-W> a:vim          " window prefix
+sethandler <C-N> a:vim          " multi-cursor  (loses IDE "New...")
+sethandler <C-X> a:vim          " multi-cursor  (loses IDE Cut)
+sethandler <C-P> a:vim          " multi-cursor  (loses IDE Parameter Info)
+sethandler <Tab> a:vim
+sethandler <S-Tab> a:vim
+
+" IDE wins
+sethandler <C-C> a:ide          " copy
+sethandler <C-V> a:ide          " paste
+sethandler <C-S> a:ide          " save all
+sethandler <C-A> a:ide          " select all
+sethandler <C-F> a:ide          " find in file
+sethandler <C-Y> a:ide          " redo (IDE)
+sethandler <C-J> a:ide          " insert live template
+sethandler <C-K> a:ide          " commit
+sethandler <C-H> a:ide
+sethandler <C-L> a:ide
+
+" =============================================================================
+"  CORE EDITING
+" =============================================================================
+inoremap jj <Esc>
+nnoremap 0 ^
+nnoremap <Esc> :nohlsearch<CR>
+
+nnoremap <C-u> <C-u>zz
+nnoremap <C-d> <C-d>zz
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+vnoremap < <gv
+vnoremap > >gv
+
+inoremap <Tab> <Tab>
+inoremap <S-Tab> <C-d>
+
+map / <Action>(Find)
+
+" Save. Formatting + import optimization happen via Actions on Save.
+nnoremap <leader><leader> :w<CR>
+
+" Jumplist. <C-i> is unavailable (same keycode as <Tab>, which is tab-nav).
+nmap <C-o> <Action>(Back)
+nmap <leader>gn <Action>(Forward)
+
+" =============================================================================
+"  ACEJUMP  —  flash-style labelled jumps
+" =============================================================================
+nmap s  <Action>(AceAction)
+xmap s  <Action>(AceAction)
+nmap S  <Action>(AceLineAction)
+xmap S  <Action>(AceLineAction)
+nmap gs <Action>(AceTargetAction)
+" NOTE: `s` no longer substitutes a char — use `cl`.
+
+" =============================================================================
+"  MULTI-CURSOR
+" =============================================================================
+map  <C-n>  <Plug>NextWholeOccurrence
+map  g<C-n> <Plug>NextOccurrence
+map  <C-x>  <Plug>SkipOccurrence
+map  <C-p>  <Plug>RemoveOccurrence
+
+" =============================================================================
+"  PANES
+"    Alt+hjkl              navigate between splits
+"    Shift+Alt+hjkl        resize splits
+"    Ctrl+Shift+Alt+h/l    move current tab to prev/next split
+" =============================================================================
+nnoremap <A-h> <C-w>h
+nnoremap <A-j> <C-w>j
+nnoremap <A-k> <C-w>k
+nnoremap <A-l> <C-w>l
+
+nmap <S-A-h> <Action>(StretchSplitToLeft)
+nmap <S-A-j> <Action>(StretchSplitToBottom)
+nmap <S-A-k> <Action>(StretchSplitToTop)
+nmap <S-A-l> <Action>(StretchSplitToRight)
+
+nmap <C-S-A-l> <Action>(MoveTabRight)
+nmap <C-S-A-j> <Action>(MoveTabDown)
+nmap <C-S-A-h> <Action>(MoveEditorToOppositeTabGroup)
+nmap <C-S-A-k> <Action>(MoveEditorToOppositeTabGroup)
+" MoveTabRight/Down = "Split and Move". They always create a NEW split rather
+" than reusing an existing one, and have no left/up counterparts — hence
+" MoveEditorToOppositeTabGroup on h/k as the return trip.
+
+sethandler <A-h> a:vim
+sethandler <A-j> a:vim
+sethandler <A-k> a:vim
+sethandler <A-l> a:vim
+
+" =============================================================================
+"  TABS
+" =============================================================================
+nmap <Tab>   <Action>(NextTab)
+nmap <S-Tab> <Action>(PreviousTab)
+nmap <leader>q <Action>(CloseContent)
+nmap <leader>Q <Action>(CloseAllEditors)
+nmap <leader>h <Action>(HideAllWindows)
+
+" =============================================================================
+"  WINDOW GROUP  <leader>w*   (editor splits)
+" =============================================================================
+nmap <leader>wv <Action>(SplitVertically)
+nmap <leader>wh <Action>(SplitHorizontally)
+nmap <leader>wq <Action>(Unsplit)
+nmap <leader>wo <Action>(UnsplitAll)
+nmap <leader>wm <Action>(MaximizeEditorInSplit)
+nmap <leader>wz <Action>(ToggleDistractionFreeMode)
+nmap <leader>wc <Action>(ChangeSplitOrientation)
+
+" =============================================================================
+"  GOTO  <leader>g*
+" =============================================================================
+nmap gd <Action>(GotoDeclaration)
+nmap gi <Action>(GotoImplementation)
+nmap gr <Action>(ShowUsages)
+nmap gt <Action>(GotoTest)
+
+nmap <leader>gd <Action>(GotoDeclaration)
+nmap <leader>gi <Action>(GotoImplementation)
+nmap <leader>gy <Action>(GotoTypeDeclaration)
+nmap <leader>gs <Action>(GotoSuperMethod)
+nmap <leader>gr <Action>(FindUsages)
+nmap <leader>gu <Action>(ShowUsages)
+nmap <leader>gt <Action>(GotoTest)
+nmap <leader>gh <Action>(TypeHierarchy)
+nmap <leader>gH <Action>(CallHierarchy)
+nmap <leader>gm <Action>(MethodHierarchy)
+nmap <leader>go <Action>(FileStructurePopup)
+nmap <leader>gb <Action>(Back)
+
+" =============================================================================
+"  DEBUG  <leader>d*
+" =============================================================================
+nmap <leader>dt <Action>(ToggleLineBreakpoint)
+nmap <leader>db <Action>(ViewBreakpoints)
+nmap <leader>ds <Action>(ContextDebug)
+nmap <leader>df <Action>(ChooseDebugConfiguration)
+
+nmap <leader>dc <Action>(Resume)
+nmap <leader>do <Action>(StepOver)
+nmap <leader>di <Action>(StepInto)
+nmap <leader>dI <Action>(SmartStepInto)
+nmap <leader>du <Action>(StepOut)
+nmap <leader>dr <Action>(RunToCursor)
+
+nmap <leader>de <Action>(EvaluateExpression)
+vmap <leader>de <Action>(QuickEvaluateExpression)
+nmap <leader>dw <Action>(Debugger.AddToWatch)
+nmap <leader>dm <Action>(ToggleMuteBreakpoints)
+nmap <leader>dC <Action>(Debugger.RemoveAllBreakpoints)
+nmap <leader>dp <Action>(Debugger.PopFrame)
+
+" =============================================================================
+"  RUN  <leader>r*
+" =============================================================================
+" <leader>rr = Shift+F10 (run last config)
+" <leader>rd = Shift+F9  (debug last config)
+nmap <leader>rr <Action>(Run)
+nmap <leader>rd <Action>(Debug)
+nmap <leader>rc <Action>(ChooseRunConfiguration)
+nmap <leader>rs <Action>(ContextRun)
+nmap <leader>rk <Action>(Stop)
+nmap <leader>rt <Action>(RunClass)
+nmap <leader>rf <Action>(RerunFailedTests)
+
+" =============================================================================
+"  CODE  <leader>l*
+" =============================================================================
+nmap <leader>lr <Action>(RenameElement)
+nmap <leader>la <Action>(ShowIntentionActions)
+vmap <leader>la <Action>(ShowIntentionActions)
+nmap <leader>lf <Action>(ReformatCode)
+vmap <leader>lf <Action>(ReformatCode)
+nmap <leader>lo <Action>(OptimizeImports)
+nmap <leader>ld <Action>(ShowErrorDescription)
+nmap <leader>lR <Action>(Refactorings.QuickListPopupAction)
+vmap <leader>lR <Action>(Refactorings.QuickListPopupAction)
+nmap <leader>lg <Action>(Generate)
+nmap <leader>li <Action>(InspectCode)
+
+nmap H <Action>(ShowErrorDescription)
+" NOTE: loses vim's "jump to top of viewport". M and L still work.
+
+" =============================================================================
+"  FIND  <leader>f*
+" =============================================================================
+nmap <leader>ff <Action>(GotoFile)
+nmap <leader>fg <Action>(FindInPath)
+nmap <leader>fr <Action>(RecentFiles)
+nmap <leader>fb <Action>(Switcher)
+nmap <leader>fk <Action>(GotoAction)
+nmap <leader>fc <Action>(GotoClass)
+nmap <leader>fy <Action>(GotoSymbol)
+nmap <leader>fp <Action>(ReplaceInPath)
+nmap <leader>fm <Action>(ManageRecentProjects)
+nmap <leader>fe <Action>(SelectInProjectView)
+nmap <leader>fs <Action>(SearchEverywhere)
+
+" =============================================================================
+"  PROBLEMS  <leader>x*
+" =============================================================================
+nmap <leader>xx <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>xt <Action>(ActivateTODOToolWindow)
+nmap <leader>xs <Action>(FileStructurePopup)
+
+" =============================================================================
+"  VCS  <leader>c*
+" =============================================================================
+nmap <leader>cc <Action>(ActivateCommitToolWindow)
+nmap <leader>cp <Action>(Vcs.Push)
+nmap <leader>cu <Action>(Vcs.UpdateProject)
+nmap <leader>cb <Action>(Annotate)
+nmap <leader>ch <Action>(Vcs.ShowTabbedFileHistory)
+nmap <leader>cd <Action>(Compare.SameVersion)
+nmap <leader>cr <Action>(Vcs.RollbackChangedLines)
+nmap <leader>cq <Action>(Vcs.QuickListPopupAction)
+
+" =============================================================================
+"  BOOKMARKS  <leader>m*
+" =============================================================================
+nmap <leader>mm <Action>(ToggleBookmark)
+nmap <leader>ml <Action>(ShowBookmarks)
+nmap <leader>mn <Action>(GotoNextBookmark)
+nmap <leader>mp <Action>(GotoPreviousBookmark)
+
+" =============================================================================
+"  BRACKET MOTIONS
+" =============================================================================
+nmap ]d <Action>(GotoNextError)
+nmap [d <Action>(GotoPreviousError)
+nmap ]c <Action>(VcsShowNextChangeMarker)
+nmap [c <Action>(VcsShowPrevChangeMarker)
+nmap ]m <Action>(MethodDown)
+nmap [m <Action>(MethodUp)
+
+" =============================================================================
+"  CONFIG  <leader>v*
+" =============================================================================
+nnoremap <leader>ve :e ~/.ideavimrc<CR>
+nnoremap <leader>vr :source ~/.ideavimrc<CR>
+nmap <leader>vs <Action>(ShowSettings)
+nnoremap <leader>? :WhichKey<CR>
+
+" =============================================================================
+"  WHICH-KEY LABELS
+" =============================================================================
+let g:WhichKey_ShowVimActions = "true"
+let g:WhichKey_ShowTypedSequence = "true"
+let g:WhichKey_SortOrder = "by_key_prefix_first"
+let g:WhichKey_FontSize = 14
+let g:WhichKey_CommandColor = "#89b4fa"
+let g:WhichKey_PrefixColor = "#cba6f7"
+let g:WhichKey_DefaultDelay = 600
+
+let g:WhichKeyDesc_goto     = "<leader>g +goto"
+let g:WhichKeyDesc_debug    = "<leader>d +debug"
+let g:WhichKeyDesc_run      = "<leader>r +run"
+let g:WhichKeyDesc_code     = "<leader>l +code"
+let g:WhichKeyDesc_find     = "<leader>f +find"
+let g:WhichKeyDesc_window   = "<leader>w +window"
+let g:WhichKeyDesc_problems = "<leader>x +problems"
+let g:WhichKeyDesc_vcs      = "<leader>c +vcs"
+let g:WhichKeyDesc_marks    = "<leader>m +bookmarks"
+let g:WhichKeyDesc_config   = "<leader>v +config"
+
+let g:WhichKeyDesc_goto_decl   = "<leader>gd declaration"
+let g:WhichKeyDesc_goto_impl   = "<leader>gi implementation"
+let g:WhichKeyDesc_goto_type   = "<leader>gy type definition"
+let g:WhichKeyDesc_goto_super  = "<leader>gs super method"
+let g:WhichKeyDesc_goto_refs   = "<leader>gr find usages"
+let g:WhichKeyDesc_goto_usages = "<leader>gu show usages popup"
+let g:WhichKeyDesc_goto_test   = "<leader>gt test"
+let g:WhichKeyDesc_goto_hier   = "<leader>gh type hierarchy"
+let g:WhichKeyDesc_goto_call   = "<leader>gH call hierarchy"
+let g:WhichKeyDesc_goto_mhier  = "<leader>gm method hierarchy"
+let g:WhichKeyDesc_goto_struct = "<leader>go file structure"
+let g:WhichKeyDesc_goto_back   = "<leader>gb back"
+let g:WhichKeyDesc_goto_fwd    = "<leader>gn forward"
+
+let g:WhichKeyDesc_debug_toggle = "<leader>dt toggle breakpoint"
+let g:WhichKeyDesc_debug_view   = "<leader>db view breakpoints"
+let g:WhichKeyDesc_debug_ctx    = "<leader>ds debug under cursor"
+let g:WhichKeyDesc_debug_choose = "<leader>df choose debug config"
+let g:WhichKeyDesc_debug_cont   = "<leader>dc continue"
+let g:WhichKeyDesc_debug_over   = "<leader>do step over"
+let g:WhichKeyDesc_debug_into   = "<leader>di step into"
+let g:WhichKeyDesc_debug_smart  = "<leader>dI smart step into"
+let g:WhichKeyDesc_debug_out    = "<leader>du step out"
+let g:WhichKeyDesc_debug_cursor = "<leader>dr run to cursor"
+let g:WhichKeyDesc_debug_eval   = "<leader>de evaluate"
+let g:WhichKeyDesc_debug_watch  = "<leader>dw add to watch"
+let g:WhichKeyDesc_debug_mute   = "<leader>dm mute breakpoints"
+let g:WhichKeyDesc_debug_clear  = "<leader>dC remove all breakpoints"
+let g:WhichKeyDesc_debug_pop    = "<leader>dp pop frame"
+
+let g:WhichKeyDesc_run_last   = "<leader>rr run (Shift+F10)"
+let g:WhichKeyDesc_run_debug  = "<leader>rd debug (Shift+F9)"
+let g:WhichKeyDesc_run_choose = "<leader>rc choose config"
+let g:WhichKeyDesc_run_ctx    = "<leader>rs run under cursor"
+let g:WhichKeyDesc_run_stop   = "<leader>rk stop"
+let g:WhichKeyDesc_run_class  = "<leader>rt run class"
+let g:WhichKeyDesc_run_failed = "<leader>rf rerun failed tests"
+
+let g:WhichKeyDesc_code_rename  = "<leader>lr rename"
+let g:WhichKeyDesc_code_action  = "<leader>la intention actions"
+let g:WhichKeyDesc_code_format  = "<leader>lf reformat"
+let g:WhichKeyDesc_code_imports = "<leader>lo optimize imports"
+let g:WhichKeyDesc_code_diag    = "<leader>ld error description"
+let g:WhichKeyDesc_code_refac   = "<leader>lR refactor menu"
+let g:WhichKeyDesc_code_gen     = "<leader>lg generate"
+let g:WhichKeyDesc_code_insp    = "<leader>li inspect code"
+
+let g:WhichKeyDesc_find_files  = "<leader>ff files"
+let g:WhichKeyDesc_find_grep   = "<leader>fg find in path"
+let g:WhichKeyDesc_find_recent = "<leader>fr recent files"
+let g:WhichKeyDesc_find_bufs   = "<leader>fb switcher"
+let g:WhichKeyDesc_find_action = "<leader>fk actions"
+let g:WhichKeyDesc_find_class  = "<leader>fc class"
+let g:WhichKeyDesc_find_sym    = "<leader>fy symbol"
+let g:WhichKeyDesc_find_repl   = "<leader>fp replace in path"
+let g:WhichKeyDesc_find_proj   = "<leader>fm recent projects"
+let g:WhichKeyDesc_find_reveal = "<leader>fe reveal in project"
+let g:WhichKeyDesc_find_every  = "<leader>fs search everywhere"
+
+let g:WhichKeyDesc_window_vert = "<leader>wv split vertically"
+let g:WhichKeyDesc_window_horz = "<leader>wh split horizontally"
+let g:WhichKeyDesc_window_quit = "<leader>wq unsplit"
+let g:WhichKeyDesc_window_only = "<leader>wo unsplit all"
+let g:WhichKeyDesc_window_max  = "<leader>wm maximize split"
+let g:WhichKeyDesc_window_zen  = "<leader>wz distraction free"
+let g:WhichKeyDesc_window_flip = "<leader>wc change orientation"
