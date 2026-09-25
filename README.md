@@ -41,6 +41,7 @@ winget install Microsoft.PowerShell
 winget install JanDeDobbeleer.OhMyPosh
 winget install ajeetdsouza.zoxide
 winget install junegunn.fzf
+winget install --id GitHub.cli
 ```
 
 PowerShell modules go on local disk rather than OneDrive, because OneDrive's
